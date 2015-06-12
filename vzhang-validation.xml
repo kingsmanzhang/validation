@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vzhang-validation>
+	<!-- 通用屏蔽词汇 -->
+	<shielding-words>
+		<words>
+			<word>*毛泽东*</word>
+			<word>*邓小平*</word>
+			<word>*江泽民*</word>
+			<word>*胡锦涛*</word>
+			<word>*习近平*</word>
+			<word>*温家宝*</word>
+			<word>*李克强*</word>
+		</words>
+		<!--
+		<files>
+			<file>1.txt</file>
+			<file>2.txt</file>
+			<file>3.txt</file>
+		</files>
+		<databases>
+			<database 
+				type="mysql"
+				connurl="root:123456@tcp(192.168.0.107:3306)/tang_ucenter?charset=utf8"
+				tablename="shielding_words"
+				columnname="word">
+			</database>
+			<database 
+				type="mysql"
+				connurl="root:123456@tcp(192.168.0.107:3306)/tang_gs_ppp?charset=utf8"
+				tablename="shielding_words"
+				columnname="word">
+			</database>
+		</databases>
+		<nosqls>
+			<nosql
+				type="redis"
+				connurl="10.211.55.4:6379"
+				password=""
+				key="shielding.words"
+			/>
+		</nosqls>
+		-->
+	</shielding-words>
+	<field-validation-rules>
+		<!--
+		属性说明
+		name: 		字段名称，必选属性
+		regexp:		是否使用正则表达式，可选属性，默认为false
+					true:	使用正则表达式验证，则regular-expression子节点必须且不允许为空
+					false:	不使用正则表达式验证
+		required:	是否为必填字段，可选属性，默认为false
+					true:	必填字段，值不能为空字串
+					false:	值允许为空字串，为空字串时则不进行后续验证（长度、正则、关键字过滤）
+		hash:		接收的值是否为hash值，可选属性，默认为false
+					true:	接收固定长度为32位的hash加密字串，所以不验证长度、不验证正则表达式
+					false:	接收明文字串，由接收方负责hash或加密(encrypt=true时)，所以要验证长度等规则
+		shielding:	是否使用通用屏蔽词库进行过滤，可选属性，默认为false
+					true:	使用shielding-words中所列屏蔽字进行过滤，同时使用disallowed（如有）中的词进行过滤
+					false:	不使用通用屏蔽词库过滤，但是还是要使用disallowed（如有）中的词进行过滤
+		encrypt:	是否需要加密，可选属性，默认为false
+					true:	验证通过后需要加密数据	
+					false:	不需要加密
+		
+		子节点说明
+		maxlength:	允许最大长度，必选节点
+		minlength:	允许的最小长度，必选节点
+		regular-expression: 当regexp属性为true时是必选节点，为false时为可选节点（不会预编译正则表达式）
+		encrypt-salt: Hash加密时的salt，可选节点，默认为""，当encrypt属性为true时，将使用此值
+		disallowed:	屏蔽词库
+		
+		其他说明
+		1、出于性能考虑，长度验证优先；
+		2、为保证高可用性，当regexp为true时，在初始化时就会进行正则表达式（regular-expression的值）的编译
+		
+		-->
+		<field name="username" regexp="true" required="true">
+			<maxlength>15</maxlength>
+			<minlength>3</minlength>
+			<regular-expression>^[a-zA-Z][0-9a-zA-Z_\.-]{2,14}$</regular-expression>
+			<!-- 不被允许列表（不区分大小写，前后支持通配符“*”） -->
+			<disallowed>fuck*</disallowed>
+			<disallowed>admin*</disallowed>
+			<disallowed>zhangwei</disallowed>
+			<disallowed>*vzhang*</disallowed>
+		</field>
+		<field name="email" regexp="true" required="false">
+			<maxlength>32</maxlength>
+			<minlength>3</minlength>
+			<regular-expression>^[0-9a-zA-Z\._-]+@([0-9a-z-]+\.)+[a-z]{2,4}$</regular-expression>
+			<!-- 不允许QQ邮箱注册 -->
+			<!--
+			<disallowed>*@qq.com</disallowed>
+			-->
+		</field>
+		<field name="password" hash="false" encrypt="true" regexp="true" required="true">
+			<maxlength>32</maxlength>
+			<minlength>3</minlength>
+			<regular-expression>^.+$</regular-expression>
+			<!-- very important note: tangacg vzhang -->
+			<encrypt-salt>ab0d3c2708b2fa9552c3e6a938a724bc</encrypt-salt>
+			<!-- 不允许使用高危密码 -->
+			<!--
+			<disallowed>password</disallowed>
+			<disallowed>123456</disallowed>
+			<disallowed>12345678</disallowed>
+			<disallowed>qwer</disallowed>
+			<disallowed>qwerty</disallowed>
+			-->
+		</field>
+		<field name="nickname" regexp="true">
+			<maxlength>25</maxlength>
+			<minlength>2</minlength>
+			<regular-expression>^[a-zA-Z&#x4e00;-&#x9fa5;][0-9a-zA-Z&#x4e00;-&#x9fa5;_\.-]{1,24}$</regular-expression>
+			<disallowed>*毛泽东*</disallowed>
+			<disallowed>*邓小平*</disallowed>
+			<disallowed>*江泽明*</disallowed>
+			<disallowed>*胡锦涛*</disallowed>
+			<disallowed>*习近平*</disallowed>
+			<disallowed>*温家宝*</disallowed>
+			<disallowed>*李克强*</disallowed>
+			<disallowed>*张卫*</disallowed>
+			<disallowed>V.Zhang</disallowed>
+		</field>
+		<field name="rolename" regexp="true">
+			<maxlength>25</maxlength>
+			<minlength>3</minlength>
+			<regular-expression>^[a-zA-Z&#x4e00;-&#x9fa5;][0-9a-zA-Z&#x4e00;-&#x9fa5;_\.-]{2,24}$</regular-expression>
+			<disallowed>*毛泽东*</disallowed>
+			<disallowed>*邓小平*</disallowed>
+			<disallowed>*胡锦涛*</disallowed>
+			<disallowed>*习近平*</disallowed>
+			<disallowed>*温家宝*</disallowed>
+			<disallowed>*李克强*</disallowed>
+		</field>
+	</field-validation-rules>
+</vzhang-validation>
